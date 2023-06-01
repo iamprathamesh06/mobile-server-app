@@ -1,0 +1,24 @@
+[{
+    "id":"1",
+    "name":"Flesh Wheat Flour ",
+    "description":"Flesh | Healthy | Neutient Fullfilled |",
+    "price":"40",
+    "imagUrl":"https://shop.myharvestfarms.com/wp-content/uploads/2021/09/Wheat-Flour-Atta.png",
+    "ingredients":[{"grain_id":1,"proportion":"1"}]
+},
+{
+    "id":"2",
+    "name":"Flesh Wheat Mixture",
+    "description":"Flesh | Healthy | Neutient Fullfilled |",
+    "price":"30",
+    "imagUrl":"https://shop.jivabhumi.com/image/cache/catalog/ProductImages/Pearl-Millet-flour-bowl-600-500x350.jpg",
+    "ingredients":[{"grain_id":2,"proportion":"0.3"},{"grain_id":5,"proportion":"0.7"}]
+},
+{
+    "id":"3",
+    "name":"Flesh Bajra Flour Mixture",
+    "description":"Flesh | Healthy | Neutient Fullfilled |",
+    "price":"50",
+    "imagUrl":"https://shop.panchayatudsar.com/wp-content/uploads/2022/07/Organic-Bajra-Flour.jpg",
+    "ingredients":[{"grain_id":5,"proportion":"0.3"},{"grain_id":2,"proportion":"0.7"}]
+}]

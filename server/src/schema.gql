@@ -1,0 +1,234 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type RegisterResponseDTO {
+  name: String!
+  id: String!
+  email: String!
+  role: String!
+  creationTime: String!
+  emailVerified: Boolean!
+  isEnabled: Boolean
+}
+
+type UserDto {
+  name: String
+  email: String!
+  id: String!
+  emailVerified: Boolean!
+  phone: String
+  role: String!
+  user_dbid: String!
+}
+
+type ResponseDTO {
+  msg: String
+}
+
+type Ingredient {
+  grain_id: String!
+  proportion: String!
+}
+
+type Product {
+  _id: String
+  name: String!
+  description: String
+  price: Float
+  ingredients: [Ingredient!]!
+  imgUrl: String
+}
+
+type StoreResponse {
+  _id: String!
+  address: String!
+  latitude: String!
+  longitude: String!
+  Inventory: [InventoryResponse!]!
+}
+
+type InventoryResponse {
+  grain_id: String!
+  quantity: Float!
+}
+
+type Grain {
+  """Example field (placeholder)"""
+  _id: ID!
+
+  """Example field (placeholder)"""
+  name: String!
+
+  """Example field (placeholder)"""
+  description: String!
+
+  """Example field (placeholder)"""
+  type: String
+
+  """Example field (placeholder)"""
+  price: Int!
+
+  """Example field (placeholder)"""
+  nutrition: String!
+  imgUrl: String
+}
+
+type Order {
+  _id: String!
+  user_id: String!
+  amount: Float!
+  address: String!
+  latitude: String
+  longitude: String
+  transaction_id: String!
+  order_status: [String!]!
+  payment_status: [String!]!
+  createdAt: String!
+  contact_info: String!
+  product_details: [ProductDetails!]!
+}
+
+type ProductDetails {
+  product_id: String!
+  quantity: Float!
+}
+
+type Query {
+  me: UserDto!
+  getProduct(_id: String!): Product!
+  getProducts(options: ProductOption!): [Product!]!
+  getAllStores: [StoreResponse!]!
+  getStore(_id: String!): StoreResponse!
+  grains: [Grain!]!
+  grain(id: String!): Grain!
+  getOrders: [Order!]!
+  getUserOrders(user_id: String!): [Order!]!
+  getOrder(_id: String!): Order!
+}
+
+input ProductOption {
+  limit: Float
+  nutrients: [String!]
+  grains: [String!]
+}
+
+type Mutation {
+  register(createUser: CreateUserInput!): RegisterResponseDTO!
+  verify: ResponseDTO!
+  forgotPassword(email: String!): ResponseDTO!
+  resetPassword(password: String!): ResponseDTO!
+  createProduct(create: CreateProductInput!): Product!
+  updateProduct(update: UpdateProductInput!): Product!
+  deleteProduct(_id: String!): String!
+  createStore(createStoreInput: CreateStoreInput!): StoreResponse!
+  updateStore(updateStoreInput: UpdateStoreInput!): StoreResponse!
+  deleteStore(_id: String!): String!
+  createGrain(createGrainInput: CreateGrainInput!): Grain!
+  updateGrain(updateGrainInput: UpdateGrainInput!): Grain!
+  removeGrain(id: String!): Grain!
+  createOrder(createOrderInput: CreateOrderInput!): Order!
+  updateOrder(updateOrderInput: UpdateOrderInput!): Order!
+  deleteOrder(_id: String!): String!
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
+  password: String!
+  phone: String!
+}
+
+input CreateProductInput {
+  name: String!
+  description: String
+  price: Float!
+  imgUrl: String!
+  ingredients: [IngredientInput!]!
+}
+
+input IngredientInput {
+  grain_id: String!
+  proportion: Float!
+}
+
+input UpdateProductInput {
+  _id: String!
+  body: CreateProductInput!
+}
+
+input CreateStoreInput {
+  address: String!
+  latitude: String!
+  longitude: String!
+  Inventory: [Inventory!]!
+}
+
+input Inventory {
+  grain_id: String!
+  quantity: Float!
+}
+
+input UpdateStoreInput {
+  _id: String!
+  body: UpdateStoreInputBody!
+}
+
+input UpdateStoreInputBody {
+  address: String
+  latitude: String
+  longitude: String
+  Inventory: [Inventory!]
+}
+
+input CreateGrainInput {
+  name: String!
+  type: String
+  description: String!
+  price: Float!
+  nutrition: String!
+  imgUrl: String
+}
+
+input UpdateGrainInput {
+  name: String
+  type: String
+  description: String
+  price: Float
+  nutrition: String
+  imgUrl: String
+  id: ID!
+}
+
+input CreateOrderInput {
+  user_id: String!
+  address: String!
+  latitude: String!
+  longitude: String!
+  contact_info: String!
+  product_details: [ProductDetailsInput!]!
+}
+
+input ProductDetailsInput {
+  product_id: String!
+  quantity: Float!
+}
+
+input UpdateOrderInput {
+  _id: String!
+  body: UpdateOrderBody!
+}
+
+input UpdateOrderBody {
+  user_id: String
+  address: String
+  latitude: String
+  longitude: String
+  contact_info: String
+  product_details: [ProductDetailsUpdate!]
+}
+
+input ProductDetailsUpdate {
+  product_id: String!
+  quantity: Float!
+}

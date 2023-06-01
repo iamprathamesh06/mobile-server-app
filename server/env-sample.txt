@@ -1,0 +1,3 @@
+FIREBASE_CONFIG = path to your json config file
+GOOGLE_APPLICATION_CREDENTIALS= path for json config file
+mail_api_key = mail api key
