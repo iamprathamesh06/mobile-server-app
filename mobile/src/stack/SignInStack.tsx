@@ -9,6 +9,9 @@ import ProductDetails from "../screens/user/ProductDetails";
 import Checkout from "../screens/user/Checkout";
 import OrderConfirm from "../screens/user/OrderConfirm";
 import MyOrderDetails from "../screens/user/MyOrderDetails";
+import Account from "../screens/user/Account";
+import { updatePassword } from "firebase/auth";
+import UpdatePassword from "../screens/user/UpdatePassword";
 
 // import Home from "../screens/user/Home";
 
@@ -51,6 +54,16 @@ export default function SignInStack() {
           name="Cart"
           component={Cart}
           options={{ animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="Account"
+          component={Account}
+          options={{ animation: "flip" }}
+        />
+        <Stack.Screen
+          name="UpdatePassword"
+          component={UpdatePassword}
+          options={{ animation: "flip" }}
         />
       </Stack.Navigator>
     </CartProvider>

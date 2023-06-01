@@ -18,6 +18,25 @@ import { useCart } from "../../context/CartContext";
 import ProductCard from "../../components/ProductCard";
 import { FlatList } from "react-native-gesture-handler";
 import ButtonGroup from "../../components/Group/ButtonGroup";
+import { gql } from "@apollo/client";
+import { client } from "../../client/ApolloClient";
+import { getFormattedDate } from "../../utils/getFormattedDate";
+import BasicProductList from "../../components/BasicProductList/BasicProductList";
+import BasicIngredientsList from "../../components/BasicIngredientsList/BasicIngredientsList";
+
+const GET_INGREDIENT_QUERY = gql`
+  query GetIngredient($id: String!) {
+    grain(id: $id) {
+      _id
+      name
+      description
+      type
+      price
+      nutrition
+      imgUrl
+    }
+  }
+`;
 
 export default function ProductDetails({ navigation, route }) {
   const handleProductPress = (product) => {
@@ -29,6 +48,34 @@ export default function ProductDetails({ navigation, route }) {
   const [error, setError] = useState("");
   const [alertType, setAlertType] = useState("error");
   const [quantity, setQuantity] = useState(1);
+  const [ingredientsData, setIngredientsData] = useState([]);
+  console.log(product);
+
+  const fetchIngredientsData = async (ingredients) => {
+    try {
+      const ingredientsData = await Promise.all(
+        ingredients.map((ingredient) => {
+          const { grain_id } = ingredient;
+          return client.query({
+            query: GET_INGREDIENT_QUERY,
+            variables: { id: grain_id },
+          });
+        })
+      );
+
+      const ingredientList = ingredientsData.map(
+        (response) => response.data.grain
+      );
+      setIngredientsData(ingredientList);
+    } catch (error) {
+      console.error("Error fetching ingredients data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchIngredientsData(product.ingredients);
+  }, []);
+
   return (
     <View style={styles.container}>
       <StatusBar></StatusBar>
@@ -87,6 +134,40 @@ export default function ProductDetails({ navigation, route }) {
             </View>
 
             <ButtonGroup quantity={quantity} setQuantity={setQuantity} />
+
+            {/* Another for Grains Description */}
+            <View style={styles.containerNameContainer}>
+              <View>
+                <Text style={styles.containerNameText}>
+                  Ingredients Details
+                </Text>
+              </View>
+            </View>
+            <View style={styles.orderItemsContainer}>
+              <View style={styles.orderItemContainer}>
+                {/* <Text style={styles.orderItemText}>Order on</Text> */}
+              </View>
+              <ScrollView
+                style={styles.orderSummaryContainer}
+                nestedScrollEnabled={true}
+              >
+                {console.log(ingredientsData)}
+                {ingredientsData.map((ingredient, index) => (
+                  <View key={index}>
+                    <BasicIngredientsList
+                      image={ingredient.imgUrl}
+                      title={ingredient?.name}
+                      type={ingredient.type}
+                      nutrition={ingredient.nutrition}
+                      description={ingredient.description}
+                      proportion={product.ingredients[index].proportion}
+                    />
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Ended Here */}
 
             <View style={styles.primaryTextContainer}>
               <Text style={styles.primaryText}>Similar Products</Text>
@@ -153,6 +234,14 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     flex: 1,
   },
+  orderSummaryContainer: {
+    backgroundColor: colors.white,
+    borderRadius: 10,
+    padding: 5,
+    maxHeight: 220,
+    width: "100%",
+    marginBottom: 5,
+  },
   primaryTextContainer: {
     padding: 20,
     display: "flex",
@@ -162,6 +251,37 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingBottom: 10,
     marginTop: 50,
+  },
+  containerNameText: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: colors.muted,
+  },
+  orderItemsContainer: {
+    margin: 10,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    backgroundColor: colors.white,
+    paddingHorizontal: 0,
+    paddingVertical: 10,
+    borderRadius: 10,
+
+    borderColor: colors.muted,
+    elevation: 3,
+    marginBottom: 10,
+  },
+  orderItemContainer: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  orderItemText: {
+    fontSize: 13,
+    color: colors.muted,
   },
   primaryText: {
     fontSize: 20,
@@ -176,6 +296,14 @@ const styles = StyleSheet.create({
     height: 240,
     paddingHorizontal: 10,
     paddingTop: 0,
+  },
+  containerNameContainer: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "flex-start",
   },
   topBarContainer: {
     backgroundColor: colors.white,

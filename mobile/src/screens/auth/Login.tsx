@@ -31,6 +31,7 @@ const ME_QUERY = gql`
       emailVerified
       phone
       role
+      user_dbid
     }
   }
 `;

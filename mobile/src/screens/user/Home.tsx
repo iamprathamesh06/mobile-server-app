@@ -23,6 +23,8 @@ import SearchableDropdown from "react-native-searchable-dropdown";
 import { SliderBox } from "react-native-image-slider-box";
 import productData from "../../temp/products.json";
 import { useCart } from "../../context/CartContext";
+import { client } from "../../client/ApolloClient";
+import { gql } from "@apollo/client";
 
 const category = [
   {
@@ -62,8 +64,38 @@ export default function Home({ navigation }) {
   const [userInfo, setUserInfo] = useState({});
   const [searchItems, setSearchItems] = useState([]);
 
+  const fetchProduct = () => {
+    const GET_PRODUCTS = gql`
+      query {
+        getProducts(options: {}) {
+          _id
+          name
+          ingredients {
+            grain_id
+            proportion
+          }
+          price
+          description
+          imgUrl
+        }
+      }
+    `;
+    client
+      .query({ query: GET_PRODUCTS })
+      .then((response) => {
+        setProducts(response.data.getProducts);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  useEffect(() => {
+    fetchProduct();
+  }, []);
+
   const handleProductPress = (product) => {
-    navigation.navigate("ProductDetails", { product });
+    navigation.navigate("ProductDetails", { product, products });
   };
   return (
     <View style={styles.container}>
@@ -208,23 +240,29 @@ export default function Home({ navigation }) {
             <Text style={styles.primaryText}>New Arrivals</Text>
           </View>
           <View style={styles.productCardContainer}>
+            {console.log(products[0])}
             <FlatList
               showsHorizontalScrollIndicator={false}
               initialNumToRender={5}
               horizontal={true}
-              data={productData}
+              data={products}
               renderItem={({ item, index }) => (
                 <View
-                  key={item._id}
+                  key={index}
                   style={{ marginLeft: 5, marginBottom: 10, marginRight: 5 }}
                 >
                   <ProductCard
                     name={item.name}
-                    image={item.imagUrl}
+                    image={item.imgUrl}
                     price={item.price}
                     limit={15}
+                    disabledCartIcon={
+                      cartProducts.find((p: any) => p._id == item._id)
+                        ? true
+                        : false
+                    }
                     onPress={() => handleProductPress(item)}
-                    onPressSecondary={() => addToCart(item)}
+                    onPressSecondary={() => addToCart(item, 1)}
                   />
                 </View>
               )}

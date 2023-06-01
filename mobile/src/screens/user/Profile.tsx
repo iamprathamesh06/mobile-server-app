@@ -54,7 +54,7 @@ export default function Profile({ navigation }) {
           text={"My Account"}
           Icon={Ionicons}
           iconName={"person"}
-          onPress={() => navigation.navigate("MYACCOUNT", { user: userInfo })}
+          onPress={() => navigation.navigate("Account", { user: user })}
         />
 
         {/* !For future use --- */}
