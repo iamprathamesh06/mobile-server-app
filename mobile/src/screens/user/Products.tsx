@@ -21,22 +21,44 @@ import CustomInput from "../../components/CustomInput";
 import { useCart } from "../../context/CartContext";
 import { gql } from "@apollo/client";
 import { client } from "../../client/ApolloClient";
+import SearchableDropdown from "react-native-searchable-dropdown";
+
+const category = [
+  {
+    _id: "62fe244f58f7aa8230817f89",
+    title: "Wheat",
+  },
+  {
+    _id: "62fe243858f7aa8230817f86",
+    title: "Bajra",
+  },
+  {
+    _id: "62fe241958f7aa8230817f83",
+    title: "Rice",
+  },
+];
 
 const Products = ({ navigation, route }) => {
   const { cartProducts, addToCart } = useCart();
-  const [isLoading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
+  const [displayProducts, setDisplayProducts] = useState([]);
   const [refeshing, setRefreshing] = useState(false);
-  const [label, setLabel] = useState("Loading...");
-  const [error, setError] = useState("");
-  const [foundItems, setFoundItems] = useState([]);
+  const { filterItemTitle } = route.params;
+  console.log(filterItemTitle);
   const [filterItem, setFilterItem] = useState("");
+  const [showFilterBar, setShowFilterBar] = useState(false);
+
+  useEffect(() => {
+    if (filterItemTitle) {
+      setFilterItem(filterItemTitle);
+      setShowFilterBar(true);
+    }
+  }, [filterItemTitle]);
 
   //get the dimenssions of active window
   const [windowWidth, setWindowWidth] = useState(
     Dimensions.get("window").width
   );
-  const windowHeight = Dimensions.get("window").height;
 
   //method to navigate to product detail screen of specific product
   const handleProductPress = (product) => {
@@ -49,34 +71,6 @@ const Products = ({ navigation, route }) => {
     fetchProduct();
     setRefreshing(false);
   };
-
-  var headerOptions = {
-    method: "GET",
-    redirect: "follow",
-  };
-  const category = [
-    {
-      _id: "62fe244f58f7aa8230817f89",
-      title: "Garments",
-      image: require("../../assets/icons/garments.png"),
-    },
-    {
-      _id: "62fe243858f7aa8230817f86",
-      title: "Electornics",
-      image: require("../../assets/icons/electronics.png"),
-    },
-    {
-      _id: "62fe241958f7aa8230817f83",
-      title: "Cosmentics",
-      image: require("../../assets/icons/cosmetics.png"),
-    },
-    {
-      _id: "62fe246858f7aa8230817f8c",
-      title: "Groceries",
-      image: require("../../assets/icons/grocery.png"),
-    },
-  ];
-  const [selectedTab, setSelectedTab] = useState(category[0]);
 
   const fetchProduct = () => {
     const GET_PRODUCTS = gql`
@@ -98,58 +92,36 @@ const Products = ({ navigation, route }) => {
       .query({ query: GET_PRODUCTS })
       .then((response) => {
         setProducts(response.data.getProducts);
+        setDisplayProducts(response.data.getProducts);
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
-  //method to fetch the product from server using API call
-  // const fetchProduct = () => {
-  //   var headerOptions = {
-  //     method: "GET",
-  //     redirect: "follow",
-  //   };
-  //   fetch(`${network.serverip}/products`, headerOptions)
-  //     .then((response) => response.json())
-  //     .then((result) => {
-  //       if (result.success) {
-  //         setProducts(result.data);
-  //         setFoundItems(result.data);
-  //         setError("");
-  //       } else {
-  //         setError(result.message);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       setError(error.message);
-  //       console.log("error", error);
-  //     });
-  // };
-
   //method to filter the product according to user search in selected category
   const filter = () => {
-    const keyword = filterItem;
-    if (keyword !== "") {
+    if (filterItem !== "") {
       const results = products.filter((product) => {
-        return product?.title.toLowerCase().includes(keyword.toLowerCase());
+        return product?.name.toLowerCase().includes(filterItem.toLowerCase());
       });
-
-      setFoundItems(results);
+      console.log(results);
+      setDisplayProducts(results);
+      setShowFilterBar(true);
     } else {
-      setFoundItems(products);
+      setDisplayProducts(products);
+      setShowFilterBar(false);
     }
   };
-
-  //render whenever the value of filterItem change
-  useEffect(() => {
-    filter();
-  }, [filterItem]);
 
   //fetch the product on initial render
   useEffect(() => {
     fetchProduct();
   }, []);
+
+  useEffect(() => {
+    filter();
+  }, [filterItem]);
 
   return (
     <View style={styles.container}>
@@ -185,14 +157,104 @@ const Products = ({ navigation, route }) => {
         </TouchableOpacity>
       </View>
       <View style={styles.bodyContainer}>
-        <View style={{ padding: 0, paddingLeft: 20, paddingRight: 20 }}>
-          <CustomInput
-            radius={5}
-            placeholder={"Search..."}
-            value={filterItem}
-            setValue={setFilterItem}
-          />
+        <View
+          style={{
+            padding: 0,
+            paddingLeft: 20,
+            paddingRight: 20,
+            marginVertical: 20,
+            zIndex: 1,
+          }}
+        >
+          <View style={styles.inputContainer}>
+            <SearchableDropdown
+              onTextChange={(text) => console.log(text)}
+              onItemSelect={(item) => handleProductPress(item)}
+              defaultIndex={0}
+              containerStyle={{
+                borderRadius: 5,
+                width: "100%",
+                elevation: 5,
+                position: "absolute",
+                zIndex: 10,
+                top: -20,
+                maxHeight: 300,
+                backgroundColor: colors.light,
+              }}
+              textInputStyle={{
+                borderRadius: 10,
+                padding: 6,
+                paddingLeft: 10,
+                borderWidth: 0,
+                backgroundColor: colors.white,
+              }}
+              itemStyle={{
+                padding: 10,
+                marginTop: 2,
+                backgroundColor: colors.white,
+                borderColor: colors.muted,
+              }}
+              itemTextStyle={{
+                color: colors.muted,
+              }}
+              itemsContainerStyle={{
+                maxHeight: "100%",
+              }}
+              items={products}
+              placeholder="Search..."
+              resetValue={false}
+              underlineColorAndroid="transparent"
+            />
+            {/* <CustomInput radius={5} placeholder={"Search...."} /> */}
+          </View>
         </View>
+
+        {/*  */}
+        <View style={styles.categoryContainer}>
+          <FlatList
+            showsHorizontalScrollIndicator={false}
+            style={styles.flatListContainer}
+            horizontal={true}
+            data={category}
+            keyExtractor={(item, index) => `${item}-${index}`}
+            renderItem={({ item, index }) => (
+              <View style={{ marginBottom: 20 }} key={index}>
+                <CustomIconButton
+                  key={index}
+                  text={item.title}
+                  onPress={() =>
+                    navigation.navigate("categories", {
+                      filterItemTitle: item.title || "",
+                      showFilter: true,
+                    })
+                  }
+                />
+              </View>
+            )}
+          />
+          <View style={styles.emptyView}></View>
+        </View>
+        {/*  */}
+        {showFilterBar && filterItem && (
+          <View style={styles.filterBarContainer}>
+            <Text style={styles.filterText}>
+              Filter applied: {filterItemTitle}
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                setShowFilterBar(false);
+                setFilterItem("");
+              }}
+            >
+              <Ionicons
+                name="close-circle-outline"
+                size={20}
+                color={colors.primary}
+                style={styles.closeIcon}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* <View style={styles.noItemContainer}>
           <View
@@ -217,7 +279,7 @@ const Products = ({ navigation, route }) => {
         </View> */}
 
         <FlatList
-          data={products}
+          data={displayProducts}
           refreshControl={
             <RefreshControl
               refreshing={refeshing}
@@ -261,6 +323,31 @@ const Products = ({ navigation, route }) => {
 export default Products;
 
 const styles = StyleSheet.create({
+  filterBarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "white",
+    borderRadius: 25,
+    marginVertical: 5,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  filterText: {
+    color: colors.primary,
+    marginRight: 10,
+  },
+  categoryContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    width: "100%",
+    height: 60,
+  },
+  closeIcon: {
+    marginLeft: 10,
+  },
   container: {
     width: "100%",
     flexDirecion: "row",
@@ -268,6 +355,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     flex: 1,
+  },
+  inputContainer: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 5,
   },
   topBarContainer: {
     width: "100%",
@@ -286,9 +380,13 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirecion: "row",
     backgroundColor: colors.light,
-
     justifyContent: "flex-start",
-    flex: 1,
+  },
+  flatListContainer: {
+    width: "100%",
+    height: 50,
+    marginTop: 10,
+    marginLeft: 10,
   },
   cartIconContainer: {
     display: "flex",

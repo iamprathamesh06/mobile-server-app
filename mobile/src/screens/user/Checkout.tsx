@@ -21,6 +21,7 @@ import ProgressDialog from "react-native-progress-dialog";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
 import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
+import * as Location from "expo-location";
 import axios from "axios";
 
 const PAYMENT_URL = `${network.serverip}/stripe/payment-intent`;
@@ -46,10 +47,54 @@ const CheckoutScreen = ({ navigation, route }) => {
   const [city, setCity] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
   const [zipcode, setZipcode] = useState("");
+  const [state, setState] = useState("");
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  const [locationDetails, setLocationDetails] = useState(null);
+  const [autoFill, setAutoFill] = useState(false);
   const stripe = useStripe();
 
-  console.log(user);
+  // Function to get current latitude and longitude
+
+  const getReverseGeocoding = async (lat, lon) => {
+    try {
+      const apiKey = "pk.ddcbdb9d7c12471efc0afc9a20857af8";
+      const apiUrl = `https://us1.locationiq.com/v1/reverse?key=${apiKey}&lat=${lat}&lon=${lon}&format=json`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      setLocationDetails(data);
+      // console.log("Location Details:", data);
+    } catch (error) {
+      console.error("Error retrieving location details:", error);
+    }
+  };
+
+  const getCurrentLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === "granted") {
+        const location = await Location.getCurrentPositionAsync({});
+        const lat = location.coords.latitude;
+        const lon = location.coords.longitude;
+        setLatitude(lat);
+        setLongitude(lon);
+        // console.log("Latitude:", latitude);
+        // console.log("Longitude:", longitude);
+        // Call your reverse geocoding function here using the latitude and longitude
+        getReverseGeocoding(lat, lon);
+      } else {
+        console.error("Permission to access location was denied");
+      }
+    } catch (error) {
+      console.error("Error getting current location:", error);
+    }
+  };
+
+  useEffect(() => {
+    getCurrentLocation();
+  }, []);
+  // console.log(user);
   const handlePayNow = async () => {
     setProcessingPayment(true);
     let productData = cartProducts.map((product) => {
@@ -130,6 +175,15 @@ const CheckoutScreen = ({ navigation, route }) => {
       }, 0)
     );
   }, []);
+
+  useEffect(() => {
+    if (autoFill) {
+      setCountry(locationDetails.address.country);
+      setCity(locationDetails.address.city);
+      setState(locationDetails.address.state);
+      setZipcode(locationDetails.address.postcode);
+    }
+  }, [autoFill]);
 
   return (
     <StripeProvider publishableKey="pk_test_51Mre3gSIea4qb8ub3qmLvyThFfe6qT53FzvR8rIhtG6CHDlOfQcnvb8mLhODpxDXosGtGEi6dNhEgjKTyJd8TRRn00CyV4LiO8">
@@ -256,6 +310,20 @@ const CheckoutScreen = ({ navigation, route }) => {
         >
           <View style={styles.modelBody}>
             <View style={styles.modelAddressContainer}>
+              <TouchableOpacity
+                onPress={() => {
+                  setAutoFill(!autoFill);
+                }}
+              >
+                <Text
+                  style={{
+                    color: colors.primary,
+                    textDecorationLine: "underline",
+                  }}
+                >
+                  {autoFill ? "Remove AutoFilled Address " : "AutoFill Address"}
+                </Text>
+              </TouchableOpacity>
               <CustomInput
                 value={streetAddress}
                 setValue={setStreetAddress}
@@ -267,16 +335,21 @@ const CheckoutScreen = ({ navigation, route }) => {
                 placeholder={"Enter City"}
               />
               <CustomInput
-                value={country}
-                setValue={setCountry}
-                placeholder={"Enter Country"}
-              />
-              <CustomInput
                 value={zipcode}
                 setValue={setZipcode}
                 placeholder={"Enter ZipCode"}
                 keyboardType={"number-pad"}
                 maxLength={6}
+              />
+              <CustomInput
+                value={country}
+                setValue={setCountry}
+                placeholder={"Enter Country"}
+              />
+              <CustomInput
+                value={state}
+                setValue={setState}
+                placeholder={"Enter State"}
               />
               {streetAddress || city || country != "" ? (
                 <CustomButton

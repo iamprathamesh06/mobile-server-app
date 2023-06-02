@@ -49,7 +49,7 @@ export default function ProductDetails({ navigation, route }) {
   const [alertType, setAlertType] = useState("error");
   const [quantity, setQuantity] = useState(1);
   const [ingredientsData, setIngredientsData] = useState([]);
-  console.log(product);
+  // console.log(product);
 
   const fetchIngredientsData = async (ingredients) => {
     try {
@@ -138,9 +138,7 @@ export default function ProductDetails({ navigation, route }) {
             {/* Another for Grains Description */}
             <View style={styles.containerNameContainer}>
               <View>
-                <Text style={styles.containerNameText}>
-                  Ingredients Details
-                </Text>
+                <Text style={styles.containerNameText}>Ingredients Detail</Text>
               </View>
             </View>
             <View style={styles.orderItemsContainer}>
@@ -151,7 +149,7 @@ export default function ProductDetails({ navigation, route }) {
                 style={styles.orderSummaryContainer}
                 nestedScrollEnabled={true}
               >
-                {console.log(ingredientsData)}
+                {/* {console.log(ingredientsData)} */}
                 {ingredientsData.map((ingredient, index) => (
                   <View key={index}>
                     <BasicIngredientsList

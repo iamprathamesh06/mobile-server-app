@@ -25,27 +25,20 @@ import productData from "../../temp/products.json";
 import { useCart } from "../../context/CartContext";
 import { client } from "../../client/ApolloClient";
 import { gql } from "@apollo/client";
+import CustomInput from "../../components/CustomInput/CustomInput";
 
 const category = [
   {
     _id: "62fe244f58f7aa8230817f89",
     title: "Wheat",
-    // image: require("../../assets/icons/garments.png"),
   },
   {
     _id: "62fe243858f7aa8230817f86",
     title: "Bajra",
-    // image: require("../../assets/icons/electronics.png"),
   },
   {
     _id: "62fe241958f7aa8230817f83",
     title: "Rice",
-    // image: require("../../assets/icons/cosmetics.png"),
-  },
-  {
-    _id: "62fe246858f7aa8230817f8c",
-    title: "Jawar",
-    // image: require("../../assets/icons/grocery.png"),
   },
 ];
 
@@ -84,6 +77,7 @@ export default function Home({ navigation }) {
       .query({ query: GET_PRODUCTS })
       .then((response) => {
         setProducts(response.data.getProducts);
+        setSearchItems(response.data.getProducts);
       })
       .catch((err) => {
         console.log(err);
@@ -162,7 +156,7 @@ export default function Home({ navigation }) {
                 width: "100%",
                 elevation: 5,
                 position: "absolute",
-                zIndex: 20,
+                zIndex: 10,
                 top: -20,
                 maxHeight: 300,
                 backgroundColor: colors.light,
@@ -193,12 +187,6 @@ export default function Home({ navigation }) {
             />
             {/* <CustomInput radius={5} placeholder={"Search...."} /> */}
           </View>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.scanButton}>
-              <Text style={styles.scanButtonText}>Search</Text>
-              {/* <Image source={scanIcon} style={{ width: 20, height: 20 }} /> */}
-            </TouchableOpacity>
-          </View>
         </View>
         <ScrollView nestedScrollEnabled={true}>
           <View style={styles.promotiomSliderContainer}>
@@ -226,9 +214,11 @@ export default function Home({ navigation }) {
                   <CustomIconButton
                     key={index}
                     text={item.title}
-                    // image={item.image}
                     onPress={() =>
-                      navigation.jumpTo("categories", { categoryID: item })
+                      navigation.navigate("categories", {
+                        filterItemTitle: item.title || "",
+                        showFilter: true,
+                      })
                     }
                   />
                 </View>
@@ -240,7 +230,7 @@ export default function Home({ navigation }) {
             <Text style={styles.primaryText}>New Arrivals</Text>
           </View>
           <View style={styles.productCardContainer}>
-            {console.log(products[0])}
+            {/* {console.log(products[0])} */}
             <FlatList
               showsHorizontalScrollIndicator={false}
               initialNumToRender={5}
@@ -326,16 +316,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   searchContainer: {
-    marginTop: 10,
+    marginVertical: 20,
     padding: 10,
     width: "100%",
+    zIndex: 1,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-evenly",
   },
   inputContainer: {
-    width: "70%",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",

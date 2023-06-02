@@ -47,7 +47,7 @@ export const CartProvider = ({ children }) => {
     const getStoredProducts = async () => {
       let productsPresent = await AsyncStorage.getItem("cartProducts");
       if (productsPresent) {
-        let storedProducts = JSON.parse(addedProducts);
+        let storedProducts = JSON.parse(productsPresent);
         console.log(storedProducts);
         setCartProducts(storedProducts);
       }
